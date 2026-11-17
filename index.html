@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMART C-pos | صالون المقص السوري للرجال</title>
+  <style>
+    :root {
+      --blue-900: #0f295c;
+      --blue-800: #1e3a8a;
+      --blue-700: #1d4ed8;
+      --blue-600: #2563eb;
+      --blue-500: #3b82f6;
+      --blue-100: #dbeafe;
+      --blue-50: #eff6ff;
+      --white: #ffffff;
+      --bg: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: #cbd5e1;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --success: #059669;
+      --success-bg: #d1fae5;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --shadow-sm: 0 2px 6px rgba(15, 41, 92, 0.06);
+      --shadow-md: 0 8px 20px rgba(15, 41, 92, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Cairo", "Tajawal", "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Interactive Icon & Button Effects */
+    .interactive-btn, .nav-btn, .hub-card {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+      cursor: pointer;
+    }
+
+    .interactive-btn:hover, .nav-btn:hover, .hub-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .interactive-btn:active, .nav-btn:active, .hub-card:active {
+      transform: scale(0.95);
+    }
+
+    .interactive-btn svg, .nav-btn svg, .hub-card svg {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .interactive-btn:active svg, .nav-btn:active svg, .hub-card:active svg {
+      transform: scale(1.25) rotate(-6deg);
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.45);
+      transform: scale(0);
+      animation: ripple-anim 0.55s linear;
+      pointer-events: none;
+    }
+
+    .hub-card .ripple, .btn-outline .ripple {
+      background: rgba(37, 99, 235, 0.2);
+    }
+
+    @keyframes ripple-anim {
+      to {
+        transform: scale(3.5);
+        opacity: 0;
+      }
+    }
+
+    /* Login Overlay */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-700) 55%, var(--blue-500) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: var(--white);
+      width: 100%;
+      max-width: 420px;
+      border-radius: 18px;
+      padding: 36px 32px;
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.28);
+      text-align: center;
+    }
+
+    .login-brand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: var(--white);
+      margin-bottom: 12px;
+      border: 2px solid var(--blue-100);
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .login-brand img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .login-box h1 {
+      font-size: 26px;
+      color: var(--blue-900);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .login-box p.sub {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin: 6px 0 24px;
+    }
+
+    /* Desktop App Shell */
+    #app-shell {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg);
+    }
+
+    /* Top Titlebar */
+    .topbar {
+      height: 66px;
+      background: linear-gradient(90deg, var(--blue-900), var(--blue-700));
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      box-shadow: var(--shadow-md);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .shop-logo-mini {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid var(--blue-100);
+      padding: 2px;
+    }
+
+    .shop-logo-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .shop-title-wrap h2 {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .shop-title-wrap span {
+      font-size: 12px;
+      color: var(--blue-100);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .user-badge .role-pill {
+      background: var(--white);
+      color: var(--blue-800);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+    }
+
+    /* Main Desktop Body */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 245px;
+      background: var(--white);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      gap: 8px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 11px;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 15px;
+      font-weight: 600;
+      text-align: right;
+      width: 100%;
+    }
+
+    .nav-btn .icon-wrap {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--blue-50);
+      color: var(--blue-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-btn:hover {
+      background: var(--blue-50);
+      color: var(--blue-700);
+    }
+
+    .nav-btn.active {
+      background: var(--blue-600);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-btn.active .icon-wrap {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+    }
+
+    .nav-btn.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Content Area */
+    .main-content {
+      flex: 1;
+      padding: 22px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .section-view {
+      display: none;
+      animation: fadeSlide 0.22s ease;
+    }
+
+    .section-view.active {
+      display: block;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer Status Bar */
+    .statusbar {
+      height: 36px;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .statusbar strong {
+      color: var(--blue-700);
+      font-weight: 800;
+      letter-spacing: 0.6px;
+    }
+
+    /* Cards & Forms */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue-900);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .readonly-banner {
+      background: var(--warning-bg);
+      color: #92400e;
+      padding: 10px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #fcd34d;
+    }
+
+    /* Hub Grid */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 10px;
+    }
+
+    .hub-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 26px 18px;
+      text-align: center;
+      border: 2px solid #e2e8f0;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hub-card:hover {
+      border-color: var(--blue-500);
+      box-shadow: var(--shadow-md);
+    }
+
+    .hub-icon {
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
+      color: var(--blue-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hub-card h3 {
+      font-size: 17px;
+      color: var(--blue-900);
+      font-weight: 700;
+    }
+
+    .hub-card p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    /* Inputs & Buttons */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: right;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--blue-900);
+    }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 14px;
+      background: var(--white);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input:disabled {
+      background: #e2e8f0;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--blue-600);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--blue-600);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--blue-700); }
+
+    .btn-success {
+      background: var(--success);
+      color: var(--white);
+    }
+    .btn-success:hover { background: #047857; }
+
+    .btn-danger {
+      background: var(--danger);
+      color: var(--white);
+    }
+    .btn-danger:hover { background: #b91c1c; }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--blue-700);
+      border: 1.5px solid var(--blue-600);
+    }
+    .btn-outline:hover { background: var(--blue-50); }
+
+    .btn-sm {
+      padding: 6px 11px;
+      font-size: 12.5px;
+      border-radius: 7px;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+      font-size: 13.5px;
+    }
+
+    th {
+      background: var(--blue-50);
+      color: var(--blue-900);
+      font-weight: 700;
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 2px solid var(--blue-100);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* POS Layout */
+    .pos-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 1050px) {
+      .pos-layout { grid-template-columns: 1fr; }
+    }
+
+    .quick-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .quick-item-btn {
+      background: var(--blue-50);
+      border: 1.5px solid var(--blue-100);
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .quick-item-btn:hover {
+      border-color: var(--blue-600);
+      background: var(--white);
+    }
+
+    .quick-item-btn .item-name {
+      font-weight: 700;
+      color: var(--blue-900);
+      font-size: 13.5px;
+    }
+
+    .quick-item-btn .item-price {
+      color: var(--blue-600);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .totals-box {
+      background: var(--blue-50);
+      border: 1.5px solid var(--blue-100);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .total-row.grand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--blue-800);
+      border-top: 2px dashed var(--blue-500);
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 18px;
+      border-right: 5px solid var(--blue-600);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-card .stat-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--blue-900);
+      margin-top: 6px;
+    }
+
+    .report-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .report-tab-btn.active {
+      background: var(--blue-600);
+      color: var(--white);
+      border-color: var(--blue-600);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .pill-blue { background: var(--blue-100); color: var(--blue-800); }
+    .pill-green { background: var(--success-bg); color: var(--success); }
+    .pill-warn { background: var(--warning-bg); color: var(--warning); }
+    .pill-red { background: var(--danger-bg); color: var(--danger); }
+    .pill-gray { background: #e2e8f0; color: #334155; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 50px;
+      left: 24px;
+      background: var(--blue-900);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      z-index: 10000;
+      display: none;
+    }
+
+    /* Print Area */
+    #print-area {
+      display: none;
+      background: #fff;
+      color: #000;
+      direction: rtl;
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      #login-screen, #app-shell, #toast {
+        display: none !important;
+      }
+      #print-area {
+        display: block !important;
+      }
+      .print-thermal {
+        width: 78mm;
+        margin: 0 auto;
+        font-size: 11px;
+        padding: 4px;
+      }
+      .print-thermal table {
+        font-size: 10px;
+      }
+      .print-thermal th, .print-thermal td {
+        padding: 4px 2px;
+        border: 1px solid #333;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .print-a4 {
+        width: 100%;
+        max-width: 195mm;
+        margin: 0 auto;
+        font-size: 14px;
+        padding: 14px;
+      }
+      .print-a4 th, .print-a4 td {
+        padding: 8px 6px;
+        border: 1px solid #444;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .print-a4 th {
+        background: #eff6ff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-brand" id="login-logo-box"></div>
+      <h1>SMART C-pos</h1>
+      <p class="sub">صالون المقص السوري للرجال</p>
+      <form id="login-form" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="form-group">
+          <label>اسم المستخدم</label>
+          <input type="text" id="login-username" placeholder="أدخل اسم المستخدم" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="login-password" placeholder="أدخل كلمة المرور" required />
+        </div>
+        <button type="submit" class="btn btn-primary interactive-btn" style="padding:12px; font-size:16px; margin-top:4px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          تسجيل الدخول
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Desktop Application Shell -->
+  <div id="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="topbar-right">
+        <div class="shop-logo-mini" id="header-logo-box"></div>
+        <div class="shop-title-wrap">
+          <h2 id="header-shop-name">صالون المقص السوري للرجال</h2>
+          <span id="header-shop-phone">01024773171</span>
+        </div>
+      </div>
+
+      <div class="topbar-left">
+        <div class="user-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="logged-user-name">المستخدم</span>
+          <span class="role-pill" id="logged-user-role">المدير</span>
+        </div>
+        <button class="btn btn-outline btn-sm interactive-btn" onclick="logout()" style="border-color:rgba(255,255,255,0.6); color:#fff; background:rgba(255,255,255,0.1);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          خروج
+        </button>
+      </div>
+    </header>
+
+    <!-- Workspace -->
+    <div class="workspace">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar-nav">
+        <button class="nav-btn active" data-section="hub" onclick="navigate('hub')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          الرئيسية (الأقسام)
+        </button>
+        <button class="nav-btn" data-section="sales" onclick="navigate('sales')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </span>
+          المبيعات (نقطة البيع)
+        </button>
+        <button class="nav-btn" data-section="items" onclick="navigate('items')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </span>
+          الأصناف والكميات
+        </button>
+        <button class="nav-btn" data-section="purchases" onclick="navigate('purchases')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </span>
+          المشتريات
+        </button>
+        <button class="nav-btn" data-section="reports" onclick="navigate('reports')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          التقارير الفورية
+        </button>
+        <button class="nav-btn" data-section="employees" onclick="navigate('employees')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          الموظفين والصلاحيات
+        </button>
+        <button class="nav-btn" data-section="settings" onclick="navigate('settings')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          لوحة التحكم
+        </button>
+        <button class="nav-btn" data-section="about" onclick="navigate('about')">
+          <span class="icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </span>
+          التعريف بالبرنامج
+        </button>
+      </aside>
+
+      <!-- Main Sections -->
+      <main class="main-content">
+        <div class="readonly-banner" id="readonly-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          صلاحية مدير المبيعات: يمكنك الدخول لكافة الأقسام وعمل فواتير المبيعات والمشتريات، بدون صلاحية تعديل الأصناف أو الموظفين أو الإعدادات أو الحذف.
+        </div>
+
+        <!-- 1. HUB / DASHBOARD -->
+        <section id="sec-hub" class="section-view active">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                واجهة الأقسام الرئيسية - <span id="hub-shop-name">صالون المقص السوري للرجال</span>
+              </div>
+              <span class="pill pill-blue" id="hub-welcome-user">مرحباً بك</span>
+            </div>
+            <div class="hub-grid" id="hub-cards-container"></div>
+          </div>
+        </section>
+
+        <!-- 2. SALES (POS) -->
+        <section id="sec-sales" class="section-view">
+          <div class="pos-layout">
+            <!-- Left Side in RTL: Item Picker & Cart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                  شاشة المبيعات ونقطة البيع
+                </div>
+              </div>
+
+              <!-- Barcode & Select -->
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div class="form-group">
+                  <label>إضافة بالباركود (اضغط Enter)</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="pos-barcode-input" placeholder="امسح أو اكتب الباركود..." />
+                    <button type="button" class="btn btn-primary btn-sm interactive-btn sale-action" onclick="addByBarcode()">إضافة</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>اختيار من القائمة</label>
+                  <div style="display:flex; gap:6px;">
+                    <select id="pos-item-select"></select>
+                    <button type="button" class="btn btn-outline btn-sm interactive-btn sale-action" onclick="addFromSelect()">إدراج</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Items Buttons -->
+              <div style="margin-bottom:14px;">
+                <label style="font-size:13px; font-weight:700; color:var(--blue-900); display:block; margin-bottom:8px;">الأصناف السريعة (اضغط للإضافة - تنقص الكمية عند البيع):</label>
+                <div class="quick-items-grid" id="pos-quick-items"></div>
+              </div>
+
+              <!-- Cart Table -->
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>الأصناف</th>
+                      <th>الكمية</th>
+                      <th>السعر</th>
+                      <th>الإجمالي</th>
+                      <th>حذف</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pos-cart-body">
+                    <tr><td colspan="5" style="color:#64748b;">السلة فارغة — أضف أصنافاً من القائمة أو الباركود</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Side in RTL: Customer, Barber, Totals -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">بيانات العميل والفاتورة</div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>رقم الكرسي</label>
+                  <input type="text" id="sale-chair" placeholder="مثال: كرسي 1" />
+                </div>
+                <div class="form-group">
+                  <label>اسم الحلاق</label>
+                  <select id="sale-barber"></select>
+                </div>
+                <div class="form-group">
+                  <label>اسم العميل</label>
+                  <input type="text" id="sale-customer" placeholder="اسم العميل" />
+                </div>
+                <div class="form-group">
+                  <label>رقم الهاتف</label>
+                  <input type="text" id="sale-phone" placeholder="01xxxxxxxxx" />
+                </div>
+                <div class="form-group">
+                  <label>الحالة</label>
+                  <select id="sale-status">
+                    <option value="صالة">صالة</option>
+                    <option value="حجز">حجز</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>نسبة الخصم (%)</label>
+                  <input type="number" id="sale-discount" min="0" max="100" value="0" oninput="renderCartTotals()" />
+                </div>
+              </div>
+
+              <div class="totals-box">
+                <div class="total-row">
+                  <span>الإجمالي قبل الخصم:</span>
+                  <span id="pos-subtotal">0.00 ج.م</span>
+                </div>
+                <div class="total-row" style="color:var(--danger);">
+                  <span>قيمة الخصم:</span>
+                  <span id="pos-discount-val">0.00 ج.م</span>
+                </div>
+                <div class="total-row grand">
+                  <span>الإجمالي العام:</span>
+                  <span id="pos-grand-total">0.00 ج.م</span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                <button class="btn btn-success interactive-btn sale-action" style="flex:1;" onclick="completeSale(true)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  حفظ وطباعة الفاتورة
+                </button>
+                <button class="btn btn-primary interactive-btn sale-action" onclick="completeSale(false)">حفظ فقط</button>
+                <button class="btn btn-danger interactive-btn sale-action" onclick="clearCart()">تفريغ</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Sales Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">سجل فواتير المبيعات الأخيرة</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>رقم</th>
+                    <th>التاريخ</th>
+                    <th>العميل</th>
+                    <th>الهاتف</th>
+                    <th>الكرسي</th>
+                    <th>الحلاق</th>
+                    <th>الحالة</th>
+                    <th>الخصم %</th>
+                    <th>الإجمالي العام</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-history-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. ITEMS -->
+        <section id="sec-items" class="section-view">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                إدارة الأصناف والكميات (تزيد بالشراء وتقل بالبيع)
+              </div>
+            </div>
+            <form id="item-form" onsubmit="saveItem(event)" class="form-grid" style="align-items:end; margin-bottom:20px;">
+              <input type="hidden" id="item-edit-id" />
+              <div class="form-group">
+                <label>الباركود</label>
+                <input type="text" id="item-barcode" placeholder="مثال: 1001" required />
+              </div>
+              <div class="form-group">
+                <label>اسم الصنف</label>
+                <input type="text" id="item-name" placeholder="مثال: قص شعر / كريم شعر" required />
+              </div>
+              <div class="form-group">
+                <label>السعر</label>
+                <input type="number" step="0.01" min="0" id="item-price" placeholder="0.00" required />
+              </div>
+              <div class="form-group">
+                <label>الكمية المتاحة</label>
+                <input type="number" step="1" min="0" id="item-qty" placeholder="0" value="0" required />
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="submit" class="btn btn-primary interactive-btn admin-action" id="item-submit-btn">إضافة الصنف</button>
+                <button type="button" class="btn btn-outline interactive-btn" onclick="resetItemForm()">جديد</button>
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الباركود</th>
+                    <th>اسم الصنف</th>
+                    <th>السعر</th>
+                    <th>الكمية المتاحة</th>
+                    <th>تعديل / حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="items-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. PURCHASES -->
+        <section id="sec-purchases" class="section-view">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                قسم المشتريات وفواتير الموردين (تزيد كمية الأصناف تلقائياً)
+              </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom:14px; align-items:end;">
+              <div class="form-group">
+                <label>الصنف (اختر من القائمة أو اكتب اسماً جديداً)</label>
+                <input type="text" id="pur-item-name" list="pur-items-datalist" placeholder="اكتب أو اختر الصنف" />
+                <datalist id="pur-items-datalist"></datalist>
+              </div>
+              <div class="form-group">
+                <label>الكمية</label>
+                <input type="number" id="pur-qty" min="1" value="1" />
+              </div>
+              <div class="form-group">
+                <label>السعر</label>
+                <input type="number" id="pur-price" min="0" step="0.01" value="0" />
+              </div>
+              <button type="button" class="btn btn-outline interactive-btn purchase-action" onclick="addPurchaseItem()">+ إضافة للفاتورة</button>
+            </div>
+
+            <div class="table-wrap" style="margin-bottom:16px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الأصناف</th>
+                    <th>الكمية</th>
+                    <th>السعر</th>
+                    <th>الإجمالي</th>
+                    <th>حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="pur-cart-body">
+                  <tr><td colspan="5" style="color:#64748b;">لم يتم إضافة أصناف لفاتورة الشراء بعد</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="form-grid" style="align-items:end;">
+              <div class="form-group">
+                <label>اسم المورد</label>
+                <input type="text" id="pur-supplier" placeholder="اسم المورد أو الشركة" />
+              </div>
+              <div class="form-group">
+                <label>رقم الهاتف</label>
+                <input type="text" id="pur-phone" placeholder="01xxxxxxxxx" />
+              </div>
+              <div class="form-group">
+                <label>نسبة الخصم (%)</label>
+                <input type="number" id="pur-discount" min="0" max="100" value="0" oninput="renderPurchaseTotals()" />
+              </div>
+              <div class="form-group">
+                <label>الإجمالي العام</label>
+                <input type="text" id="pur-grand-display" readonly value="0.00 ج.م" style="font-weight:800; color:var(--blue-800); background:var(--blue-50);" />
+              </div>
+              <button type="button" class="btn btn-primary interactive-btn purchase-action" onclick="savePurchase()">حفظ فاتورة المشتريات</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">سجل فواتير المشتريات</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>رقم</th>
+                    <th>التاريخ</th>
+                    <th>الأصناف</th>
+                    <th>اسم المورد</th>
+                    <th>رقم الهاتف</th>
+                    <th>الخصم %</th>
+                    <th>الإجمالي العام</th>
+                    <th>حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="purchases-history-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. REPORTS -->
+        <section id="sec-reports" class="section-view">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">إجمالي المبيعات</div>
+              <div class="stat-val" id="rep-total-sales">0.00 ج.م</div>
+            </div>
+            <div class="stat-card" style="border-right-color:var(--danger);">
+              <div class="stat-label">إجمالي المشتريات</div>
+              <div class="stat-val" id="rep-total-purchases">0.00 ج.م</div>
+            </div>
+            <div class="stat-card" style="border-right-color:var(--success);">
+              <div class="stat-label">الإجمالي العام الصافي (جميع العمليات)</div>
+              <div class="stat-val" id="rep-net-total">0.00 ج.م</div>
+            </div>
+            <div class="stat-card" style="border-right-color:var(--warning);">
+              <div class="stat-label">عدد الفواتير المسجلة</div>
+              <div class="stat-val" id="rep-ops-count">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                عرض وطباعة التقارير لحظة بلحظة
+              </div>
+              <button class="btn btn-primary interactive-btn" onclick="printActiveReport()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                طباعة التقرير المعروض
+              </button>
+            </div>
+
+            <div class="report-tabs">
+              <button class="btn btn-outline btn-sm interactive-btn report-tab-btn active" data-rep="overall" onclick="selectReportTab('overall')">عرض الإجمالي العام للعمليات</button>
+              <button class="btn btn-outline btn-sm interactive-btn report-tab-btn" data-rep="sales" onclick="selectReportTab('sales')">عرض تقرير المبيعات</button>
+              <button class="btn btn-outline btn-sm interactive-btn report-tab-btn" data-rep="purchases" onclick="selectReportTab('purchases')">عرض تقرير المشتريات</button>
+              <button class="btn btn-outline btn-sm interactive-btn report-tab-btn" data-rep="employees" onclick="selectReportTab('employees')">عرض تقرير الموظفين والحلاقين</button>
+            </div>
+
+            <div id="report-viewer-box"></div>
+          </div>
+        </section>
+
+        <!-- 6. EMPLOYEES & PERMISSIONS -->
+        <section id="sec-employees" class="section-view">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                إدارة الموظفين والحلاقين والمستخدمين
+              </div>
+            </div>
+            <form id="emp-form" onsubmit="saveEmployee(event)" class="form-grid" style="align-items:end; margin-bottom:20px;">
+              <input type="hidden" id="emp-edit-id" />
+              <div class="form-group">
+                <label>اسم الموظف / الحلاق</label>
+                <input type="text" id="emp-name" placeholder="الاسم بالكامل" required />
+              </div>
+              <div class="form-group">
+                <label>الصلاحية / الوظيفة</label>
+                <select id="emp-role" onchange="toggleEmpCredentials()">
+                  <option value="admin">المدير (تحكم كامل في كل شيء)</option>
+                  <option value="sales_manager">مدير المبيعات (عرض + فواتير مبيعات ومشتريات)</option>
+                  <option value="cashier">الكاشير (شاشة المبيعات فقط)</option>
+                  <option value="barber">حلاق (لا يدخل البرنامج مطلقاً - بدون حساب)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>اسم المستخدم للدخول</label>
+                <input type="text" id="emp-username" placeholder="username" required />
+              </div>
+              <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="text" id="emp-password" placeholder="كلمة المرور" required />
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="submit" class="btn btn-primary interactive-btn admin-action" id="emp-submit-btn">إضافة موظف</button>
+                <button type="button" class="btn btn-outline interactive-btn" onclick="resetEmpForm()">جديد</button>
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم الموظف</th>
+                    <th>الصلاحية</th>
+                    <th>اسم المستخدم</th>
+                    <th>كلمة المرور</th>
+                    <th>تعديل / حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="emp-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">مصفوفة الصلاحيات في النظام</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الصلاحية</th>
+                    <th>الدخول للأقسام</th>
+                    <th>العمليات والتعديل</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="pill pill-green">المدير</span></td>
+                    <td>كافة الأقسام بدون استثناء</td>
+                    <td>صلاحية كاملة للإضافة والتعديل والحذف والتحكم في كل شيء</td>
+                  </tr>
+                  <tr>
+                    <td><span class="pill pill-warn">مدير المبيعات</span></td>
+                    <td>كافة الأقسام</td>
+                    <td>عرض كافة الأقسام والتقارير + عمل فواتير المبيعات وفواتير المشتريات (بدون حذف أو تعديل الأصناف والموظفين والإعدادات)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="pill pill-blue">الكاشير</span></td>
+                    <td>يفتح شاشة المبيعات فقط</td>
+                    <td>تنفيذ عمليات البيع وطباعة الفواتير في شاشة المبيعات فقط</td>
+                  </tr>
+                  <tr>
+                    <td><span class="pill pill-gray">حلاق</span></td>
+                    <td>لا يحق له الدخول مطلقاً</td>
+                    <td>لا يتحكم في البرنامج ولا يوجد له اسم مستخدم أو كلمة مرور (يُختار اسمه في الفواتير فقط)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. CONTROL PANEL / SETTINGS -->
+        <section id="sec-settings" class="section-view">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                لوحة التحكم وإعدادات الطباعة
+              </div>
+            </div>
+
+            <form onsubmit="saveSettings(event)" class="form-grid">
+              <div class="form-group">
+                <label>خاصية الطباعة لفاتورة المبيعات</label>
+                <select id="set-invoice-print">
+                  <option value="thermal">ورقة طابعة حراري (80mm)</option>
+                  <option value="a4">ورقة A4</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>خاصية الطباعة للتقارير</label>
+                <select id="set-report-print">
+                  <option value="a4">ورقة A4</option>
+                  <option value="thermal">ورقة طابعة حراري (80mm)</option>
+                </select>
+              </div>
+              <div style="grid-column: 1 / -1; margin-top:10px;">
+                <button type="submit" class="btn btn-primary interactive-btn admin-action">حفظ إعدادات لوحة التحكم</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- 8. ABOUT -->
+        <section id="sec-about" class="section-view">
+          <div class="card" style="max-width:760px; margin:20px auto; text-align:center; padding:36px 28px;">
+            <div style="width:84px; height:84px; margin:0 auto 16px; border-radius:22px; background:var(--blue-50); color:var(--blue-600); display:flex; align-items:center; justify-content:center; border:2px solid var(--blue-100);">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h2 style="font-size:28px; color:var(--blue-900); font-weight:800; margin-bottom:14px;">SMART C-pos</h2>
+            <p style="font-size:16px; line-height:1.9; color:var(--text-main); background:var(--blue-50); padding:18px 22px; border-radius:14px; border:1px solid var(--blue-100); margin-bottom:22px;">
+              يقدم البرنامج شاشة مبيعات سهلة الاستخدام حيث يحسب نقاط البيع و يقدم لك التقارير لحظة بلحظة
+              سواء تقارير مبيعات او مشتريات او موظفين او الاجمالي العام لجميع العمليات
+            </p>
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:16px; color:var(--blue-900); font-weight:700;">
+              <div>برمجة: محاسب/ مصطفى شبانة</div>
+              <div style="color:var(--blue-600);">للتواصل موبايل أو واتساب: <span dir="ltr">01016320466</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Bottom App Bar -->
+    <footer class="statusbar">
+      <div>اسم البرنامج: <strong>SMART C-pos</strong></div>
+      <div id="live-clock"></div>
+    </footer>
+  </div>
+
+  <!-- Hidden Print Container -->
+  <div id="print-area"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast"></div>
+
+  <script>
+    // ================= FIXED SHOP IDENTITY & LOGO =================
+    const FIXED_SHOP_NAME = 'صالون المقص السوري للرجال';
+    const FIXED_SHOP_PHONE = '01024773171';
+    const STORAGE_KEY = 'smart_c_pos_data_v4';
+
+    // Vector Barber Logo (Black & white bearded man with glasses inside circular emblem)
+    const BARBER_SVG_RAW = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+        <rect width="220" height="220" fill="#ffffff"/>
+        <circle cx="105" cy="118" r="78" fill="#111111"/>
+        <!-- Neck & Collar -->
+        <path d="M52 178 C62 166 76 164 88 176 L84 194 C70 194 58 188 52 178 Z" fill="#111111" stroke="#ffffff" stroke-width="3"/>
+        <path d="M58 144 L96 146 L94 176 C80 174 68 164 58 144 Z" fill="#ffffff"/>
+        <!-- Pompadour Hair & Side Fade -->
+        <path d="M56 138 C46 118 46 84 62 56 C78 30 112 20 144 16 C158 14 174 22 174 42 C174 56 162 62 150 64 C132 67 118 68 106 78 C96 86 90 96 86 112 L72 138 Z" fill="#111111"/>
+        <!-- Hair White Highlights -->
+        <path d="M74 58 C96 42 130 34 160 28" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M68 72 C92 56 126 48 162 42" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M66 84 C90 68 124 60 156 54" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Face Profile -->
+        <path d="M88 76 C106 64 134 62 150 66 C158 76 162 90 162 104 L172 122 C174 127 168 132 162 132 L152 134 L144 154 L94 152 L84 128 Z" fill="#ffffff"/>
+        <!-- Ear -->
+        <path d="M74 102 C74 90 88 90 92 104 C94 118 86 128 78 124 C74 122 72 112 74 102 Z" fill="#ffffff" stroke="#111111" stroke-width="4"/>
+        <path d="M80 104 C84 102 86 112 81 116" fill="none" stroke="#111111" stroke-width="3" stroke-linecap="round"/>
+        <!-- Glasses -->
+        <path d="M86 102 L120 92 C128 90 140 90 148 92 L170 96 L168 118 C164 124 154 124 148 118 L142 104 L132 118 C126 124 116 122 114 114 L112 104 L88 112 Z" fill="#111111"/>
+        <rect x="120" y="96" width="18" height="19" rx="4" fill="#ffffff"/>
+        <rect x="148" y="97" width="17" height="18" rx="4" fill="#ffffff"/>
+        <!-- Nose shadow -->
+        <path d="M162 124 C166 125 168 129 160 131" fill="none" stroke="#111111" stroke-width="3" stroke-linecap="round"/>
+        <!-- Beard -->
+        <path d="M92 120 C100 132 112 138 128 136 C140 134 150 136 160 140 L168 156 C172 178 164 202 152 210 C134 204 114 192 98 172 C90 160 88 140 92 120 Z" fill="#111111"/>
+        <!-- Beard White Texture -->
+        <path d="M148 156 C152 174 150 192 146 202" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M158 158 C162 176 160 192 154 204" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M138 158 C142 174 140 188 136 198" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <!-- Mustache -->
+        <path d="M126 140 C138 132 152 132 162 138 C168 142 174 142 178 136 C176 146 168 150 156 146 C146 142 136 144 126 148 Z" fill="#ffffff" stroke="#111111" stroke-width="2"/>
+      </svg>
+    `;
+    const BARBER_SVG_LOGO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(BARBER_SVG_RAW.trim());
+
+    function getLogoImgHtml(styleStr) {
+      return `<img src="logo.jpg" data-tried="jpg" onerror="if(this.dataset.tried==='jpg'){this.dataset.tried='png';this.src='logo.png';}else{this.onerror=null;this.src=BARBER_SVG_LOGO;}" style="${styleStr}" alt="شعار الصالون" />`;
+    }
+
+    const DEFAULT_DATA = {
+      settings: {
+        shopName: FIXED_SHOP_NAME,
+        shopPhone: FIXED_SHOP_PHONE,
+        invoicePrintType: 'thermal',
+        reportPrintType: 'a4'
+      },
+      items: [
+        { id: 1, barcode: '101', name: 'قص شعر كلاسيك', price: 80, qty: 100 },
+        { id: 2, barcode: '102', name: 'حلاقة وتحديد ذقن', price: 50, qty: 100 },
+        { id: 3, barcode: '103', name: 'تنظيف بشرة وبخار', price: 120, qty: 50 },
+        { id: 4, barcode: '104', name: 'كريم / واكس شعر', price: 90, qty: 30 },
+        { id: 5, barcode: '105', name: 'باكدج عريس كامل', price: 500, qty: 20 }
+      ],
+      employees: [
+        { id: 1, name: 'مصطفى شبانة', username: 'admin', password: '1234', role: 'admin' },
+        { id: 2, name: 'أحمد علي', username: 'manager', password: '1234', role: 'sales_manager' },
+        { id: 3, name: 'محمد حسن', username: 'cashier', password: '1234', role: 'cashier' },
+        { id: 4, name: 'كريم محمود', username: '', password: '', role: 'barber' }
+      ],
+      sales: [],
+      purchases: []
+    };
+
+    let db = loadDB();
+    let currentUser = null;
+    let posCart = [];
+    let purchaseCart = [];
+    let activeReportTab = 'overall';
+
+    function loadDB() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('smart_c_pos_data_v3') || localStorage.getItem('smart_c_pos_data_v2') || localStorage.getItem('smart_c_pos_data_v1');
+        if (!raw) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+          return JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+        const parsed = JSON.parse(raw);
+        parsed.settings = parsed.settings || {};
+        parsed.settings.shopName = FIXED_SHOP_NAME;
+        parsed.settings.shopPhone = FIXED_SHOP_PHONE;
+        parsed.items = (parsed.items || []).map(it => ({
+          ...it,
+          qty: it.qty !== undefined ? Number(it.qty) : 20
+        }));
+        return parsed;
+      } catch (e) {
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      }
+    }
+
+    function saveDB() {
+      db.settings.shopName = FIXED_SHOP_NAME;
+      db.settings.shopPhone = FIXED_SHOP_PHONE;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    }
+
+    // ================= INIT LOGOS ON LOAD =================
+    document.getElementById('login-logo-box').innerHTML = getLogoImgHtml('width:100%; height:100%; object-fit:contain;');
+    document.getElementById('header-logo-box').innerHTML = getLogoImgHtml('width:100%; height:100%; object-fit:contain;');
+
+    // ================= RIPPLE & UI HELPERS =================
+    document.addEventListener('click', function (e) {
+      const target = e.target.closest('.interactive-btn, .nav-btn, .hub-card');
+      if (!target || target.disabled || target.classList.contains('locked')) return;
+      const circle = document.createElement('span');
+      const diameter = Math.max(target.clientWidth, target.clientHeight);
+      const rect = target.getBoundingClientRect();
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
+      circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
+      circle.classList.add('ripple');
+      const old = target.querySelector('.ripple');
+      if (old) old.remove();
+      target.appendChild(circle);
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    function roleLabel(role) {
+      if (role === 'admin') return 'المدير';
+      if (role === 'sales_manager') return 'مدير المبيعات';
+      if (role === 'cashier') return 'الكاشير';
+      return 'حلاق';
+    }
+
+    function rolePillClass(role) {
+      if (role === 'admin') return 'pill-green';
+      if (role === 'sales_manager') return 'pill-warn';
+      if (role === 'cashier') return 'pill-blue';
+      return 'pill-gray';
+    }
+
+    // Permissions Helpers
+    function canModifyData() {
+      return currentUser && currentUser.role === 'admin';
+    }
+    function canPerformSale() {
+      return currentUser && ['admin', 'cashier', 'sales_manager'].includes(currentUser.role);
+    }
+    function canPerformPurchase() {
+      return currentUser && ['admin', 'sales_manager'].includes(currentUser.role);
+    }
+
+    // ================= LOGIN & PERMISSIONS =================
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+      if (!u || !p) {
+        showToast('أدخل اسم المستخدم وكلمة المرور');
+        return;
+      }
+      const user = db.employees.find(emp =>
+        emp.role !== 'barber' && emp.username === u && emp.password === p
+      );
+      if (!user) {
+        showToast('بيانات الدخول غير صحيحة أو الحساب غير مصرح له بالدخول');
+        return;
+      }
+      currentUser = user;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-shell').style.display = 'flex';
+      initAfterLogin();
+    });
+
+    function logout() {
+      currentUser = null;
+      posCart = [];
+      purchaseCart = [];
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('app-shell').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+
+    function initAfterLogin() {
+      document.getElementById('logged-user-name').textContent = currentUser.name;
+      document.getElementById('logged-user-role').textContent = roleLabel(currentUser.role);
+      document.getElementById('hub-welcome-user').textContent = `أهلاً بك: ${currentUser.name} (${roleLabel(currentUser.role)})`;
+
+      applySettingsUI();
+      applyPermissionsUI();
+      renderHubCards();
+      renderPOSItems();
+      renderCart();
+      renderSalesHistory();
+      renderItemsTable();
+      renderPurchaseCart();
+      renderPurchasesHistory();
+      renderEmployeesTable();
+      renderReports();
+
+      if (currentUser.role === 'cashier') {
+        navigate('sales');
+      } else {
+        navigate('hub');
+      }
+    }
+
+    function applyPermissionsUI() {
+      const isCashier = currentUser.role === 'cashier';
+      const isSalesMgr = currentUser.role === 'sales_manager';
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const sec = btn.getAttribute('data-section');
+        if (isCashier && sec !== 'sales') {
+          btn.classList.add('locked');
+          btn.style.display = 'none';
+        } else {
+          btn.classList.remove('locked');
+          btn.style.display = 'flex';
+        }
+      });
+
+      document.getElementById('readonly-banner').style.display = isSalesMgr ? 'flex' : 'none';
+
+      document.querySelectorAll('.admin-action').forEach(btn => {
+        btn.disabled = !canModifyData();
+      });
+      document.querySelectorAll('.sale-action').forEach(btn => {
+        btn.disabled = !canPerformSale();
+      });
+      document.querySelectorAll('.purchase-action').forEach(btn => {
+        btn.disabled = !canPerformPurchase();
+      });
+    }
+
+    function navigate(section) {
+      if (currentUser && currentUser.role === 'cashier' && section !== 'sales') {
+        showToast('صلاحية الكاشير مقتصرة على شاشة المبيعات فقط');
+        return;
+      }
+      document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+      document.getElementById('sec-' + section).classList.add('active');
+
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-section') === section);
+      });
+
+      if (section === 'reports') renderReports();
+      if (section === 'sales') {
+        renderPOSItems();
+        renderSalesHistory();
+      }
+      if (section === 'items') renderItemsTable();
+      if (section === 'purchases') renderPurchasesHistory();
+      applyPermissionsUI();
+    }
+
+    // ================= HUB CARDS =================
+    const HUB_SECTIONS = [
+      {
+        id: 'sales', title: 'المبيعات', desc: 'نقطة البيع والباركود والفواتير',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
+      },
+      {
+        id: 'items', title: 'الأصناف والكميات', desc: 'إضافة وتعديل الباركود والأسعار والكميات',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>'
+      },
+      {
+        id: 'purchases', title: 'المشتريات', desc: 'فواتير الموردين وزيادة المخزون',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>'
+      },
+      {
+        id: 'reports', title: 'التقارير', desc: 'عرض وطباعة التقارير لحظة بلحظة',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+      },
+      {
+        id: 'employees', title: 'الموظفين والصلاحيات', desc: 'الحسابات والحلاقين والأدوار',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+      },
+      {
+        id: 'settings', title: 'لوحة التحكم', desc: 'إعدادات نوع الطباعة للفواتير والتقارير',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+      },
+      {
+        id: 'about', title: 'التعريف بالبرنامج', desc: 'معلومات المطور SMART C-pos',
+        icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+      }
+    ];
+
+    function renderHubCards() {
+      const container = document.getElementById('hub-cards-container');
+      container.innerHTML = '';
+      HUB_SECTIONS.forEach(s => {
+        if (currentUser.role === 'cashier' && s.id !== 'sales') return;
+        const div = document.createElement('div');
+        div.className = 'hub-card';
+        div.onclick = () => navigate(s.id);
+        div.innerHTML = `
+          <div class="hub-icon">${s.icon}</div>
+          <h3>${s.title}</h3>
+          <p>${s.desc}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ================= POS / SALES =================
+    document.getElementById('pos-barcode-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addByBarcode();
+      }
+    });
+
+    function renderPOSItems() {
+      const select = document.getElementById('pos-item-select');
+      const quick = document.getElementById('pos-quick-items');
+      const barberSel = document.getElementById('sale-barber');
+      const datalist = document.getElementById('pur-items-datalist');
+
+      select.innerHTML = db.items.map(i => `<option value="${i.id}">${i.name} (${i.price} ج.م | متاح: ${i.qty})</option>`).join('');
+      datalist.innerHTML = db.items.map(i => `<option value="${i.name}">`).join('');
+
+      quick.innerHTML = '';
+      db.items.forEach(item => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'quick-item-btn interactive-btn sale-action';
+        b.disabled = !canPerformSale();
+        b.onclick = () => addItemToCart(item);
+        b.innerHTML = `
+          <span class="item-name">${item.name}</span>
+          <span class="item-price">${Number(item.price).toFixed(2)} ج.م</span>
+          <span style="font-size:11px; color:${item.qty <= 0 ? 'var(--danger)' : '#64748b'};">متاح: ${item.qty} | #${item.barcode}</span>
+        `;
+        quick.appendChild(b);
+      });
+
+      const sortedStaff = [...db.employees].sort((a, b) => (a.role === 'barber' ? -1 : 1));
+      barberSel.innerHTML = sortedStaff.map(emp => `<option value="${emp.name}">${emp.name} (${roleLabel(emp.role)})</option>`).join('');
+    }
+
+    function addByBarcode() {
+      if (!canPerformSale()) return showToast('ليس لديك صلاحية الإضافة');
+      const code = document.getElementById('pos-barcode-input').value.trim();
+      if (!code) return;
+      const item = db.items.find(i => i.barcode === code);
+      if (!item) {
+        showToast('لم يتم العثور على صنف بهذا الباركود');
+        return;
+      }
+      addItemToCart(item);
+      document.getElementById('pos-barcode-input').value = '';
+    }
+
+    function addFromSelect() {
+      if (!canPerformSale()) return showToast('ليس لديك صلاحية الإضافة');
+      const id = Number(document.getElementById('pos-item-select').value);
+      const item = db.items.find(i => i.id === id);
+      if (item) addItemToCart(item);
+    }
+
+    function addItemToCart(item) {
+      if (!canPerformSale()) return;
+      const existing = posCart.find(c => c.id === item.id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        posCart.push({ id: item.id, name: item.name, price: Number(item.price), qty: 1 });
+      }
+      if (item.qty <= 0) {
+        showToast(`تنبيه: الرصيد المتاح من (${item.name}) هو ${item.qty}`);
+      }
+      renderCart();
+    }
+
+    function updateCartQty(idx, delta) {
+      if (!canPerformSale()) return;
+      posCart[idx].qty += delta;
+      if (posCart[idx].qty <= 0) posCart.splice(idx, 1);
+      renderCart();
+    }
+
+    function removeCartItem(idx) {
+      if (!canPerformSale()) return;
+      posCart.splice(idx, 1);
+      renderCart();
+    }
+
+    function clearCart() {
+      if (!canPerformSale()) return;
+      posCart = [];
+      document.getElementById('sale-discount').value = 0;
+      renderCart();
+    }
+
+    function renderCart() {
+      const tbody = document.getElementById('pos-cart-body');
+      if (posCart.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#64748b;">السلة فارغة — أضف أصنافاً من القائمة أو الباركود</td></tr>';
+      } else {
+        tbody.innerHTML = posCart.map((c, idx) => `
+          <tr>
+            <td><strong>${c.name}</strong></td>
+            <td>
+              <div style="display:inline-flex; align-items:center; gap:6px;">
+                <button class="btn btn-outline btn-sm" onclick="updateCartQty(${idx}, -1)">-</button>
+                <strong>${c.qty}</strong>
+                <button class="btn btn-outline btn-sm" onclick="updateCartQty(${idx}, 1)">+</button>
+              </div>
+            </td>
+            <td>${c.price.toFixed(2)}</td>
+            <td><strong>${(c.price * c.qty).toFixed(2)}</strong></td>
+            <td><button class="btn btn-danger btn-sm" onclick="removeCartItem(${idx})">حذف</button></td>
+          </tr>
+        `).join('');
+      }
+      renderCartTotals();
+    }
+
+    function renderCartTotals() {
+      const sub = posCart.reduce((acc, c) => acc + c.price * c.qty, 0);
+      const discPct = Math.min(100, Math.max(0, Number(document.getElementById('sale-discount').value) || 0));
+      const discVal = sub * (discPct / 100);
+      const grand = sub - discVal;
+      document.getElementById('pos-subtotal').textContent = sub.toFixed(2) + ' ج.م';
+      document.getElementById('pos-discount-val').textContent = discVal.toFixed(2) + ' ج.م';
+      document.getElementById('pos-grand-total').textContent = grand.toFixed(2) + ' ج.م';
+    }
+
+    function completeSale(shouldPrint) {
+      if (!canPerformSale()) return showToast('غير مصرح لك بتنفيذ المبيعات');
+      if (posCart.length === 0) return showToast('أضف أصنافاً للفاتورة أولاً');
+
+      const chair = document.getElementById('sale-chair').value.trim() || '-';
+      const barber = document.getElementById('sale-barber').value || '-';
+      const customer = document.getElementById('sale-customer').value.trim() || 'عميل نقدي';
+      const phone = document.getElementById('sale-phone').value.trim() || '-';
+      const status = document.getElementById('sale-status').value;
+      const discountPct = Math.min(100, Math.max(0, Number(document.getElementById('sale-discount').value) || 0));
+
+      const subtotal = posCart.reduce((s, c) => s + c.price * c.qty, 0);
+      const discountAmount = subtotal * (discountPct / 100);
+      const grandTotal = subtotal - discountAmount;
+
+      posCart.forEach(cartItem => {
+        const dbItem = db.items.find(i => i.id === cartItem.id || i.name === cartItem.name);
+        if (dbItem) {
+          dbItem.qty = Math.max(0, Number(dbItem.qty || 0) - Number(cartItem.qty));
+        }
+      });
+
+      const invoice = {
+        id: Date.now(),
+        number: db.sales.length + 1,
+        date: new Date().toLocaleString('ar-EG'),
+        items: JSON.parse(JSON.stringify(posCart)),
+        chair,
+        barber,
+        customer,
+        phone,
+        status,
+        discountPct,
+        discountAmount,
+        subtotal,
+        grandTotal,
+        createdBy: currentUser.name
+      };
+
+      db.sales.unshift(invoice);
+      saveDB();
+      clearCart();
+      document.getElementById('sale-customer').value = '';
+      document.getElementById('sale-phone').value = '';
+      document.getElementById('sale-chair').value = '';
+      renderPOSItems();
+      renderItemsTable();
+      renderSalesHistory();
+      renderReports();
+      showToast('تم حفظ فاتورة المبيعات وخصم الكميات بنجاح');
+
+      if (shouldPrint) {
+        printSalesInvoice(invoice);
+      }
+    }
+
+    function renderSalesHistory() {
+      const tbody = document.getElementById('sales-history-body');
+      if (db.sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#64748b;">لا توجد فواتير مبيعات مسجلة حتى الآن</td></tr>';
+        return;
+      }
+      tbody.innerHTML = db.sales.map(s => `
+        <tr>
+          <td>#${s.number}</td>
+          <td>${s.date}</td>
+          <td>${s.customer}</td>
+          <td>${s.phone}</td>
+          <td>${s.chair}</td>
+          <td>${s.barber}</td>
+          <td><span class="pill ${s.status === 'حجز' ? 'pill-warn' : 'pill-green'}">${s.status}</span></td>
+          <td>${s.discountPct}%</td>
+          <td><strong>${s.grandTotal.toFixed(2)} ج.م</strong></td>
+          <td style="display:flex; gap:6px; justify-content:center;">
+            <button class="btn btn-outline btn-sm" onclick="reprintInvoice(${s.id})">طباعة</button>
+            ${canModifyData() ? `<button class="btn btn-danger btn-sm" onclick="deleteSale(${s.id})">حذف</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function reprintInvoice(id) {
+      const inv = db.sales.find(s => s.id === id);
+      if (inv) printSalesInvoice(inv);
+    }
+
+    function deleteSale(id) {
+      if (!canModifyData()) return showToast('الحذف متاح للمدير فقط');
+      db.sales = db.sales.filter(s => s.id !== id);
+      saveDB();
+      renderSalesHistory();
+      renderReports();
+      showToast('تم حذف الفاتورة');
+    }
+
+    // ================= PRINT SALES INVOICE =================
+    function printSalesInvoice(inv) {
+      const st = db.settings;
+      const modeClass = st.invoicePrintType === 'thermal' ? 'print-thermal' : 'print-a4';
+      const logoHtml = getLogoImgHtml('width:82px; height:82px; object-fit:contain; display:block; margin:0 auto 6px; border-radius:50%;');
+
+      const rowsHtml = inv.items.map(it => `
+        <tr>
+          <td>${it.name}</td>
+          <td>${it.qty}</td>
+          <td>${it.price.toFixed(2)}</td>
+          <td>${(it.price * it.qty).toFixed(2)}</td>
+          <td>${inv.chair}</td>
+          <td>${inv.customer}</td>
+          <td>${inv.status}</td>
+        </tr>
+      `).join('');
+
+      const area = document.getElementById('print-area');
+      area.className = modeClass;
+      area.innerHTML = `
+        <div style="text-align:center; border-bottom:2px dashed #333; padding-bottom:8px; margin-bottom:10px;">
+          ${logoHtml}
+          <h2 style="margin:2px 0; font-size:1.35em;">${FIXED_SHOP_NAME}</h2>
+          <div style="font-weight:bold;">موبايل: ${FIXED_SHOP_PHONE}</div>
+          <div style="font-size:0.9em; margin-top:4px;">فاتورة رقم #${inv.number} | ${inv.date}</div>
+          <div style="font-size:0.9em;">الحلاق: ${inv.barber} | هاتف العميل: ${inv.phone}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:10px;">
+          <thead>
+            <tr>
+              <th>الأصناف</th>
+              <th>الكمية</th>
+              <th>السعر</th>
+              <th>الإجمالي</th>
+              <th>رقم الكرسي</th>
+              <th>اسم العميل</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div style="border-top:2px dashed #333; padding-top:8px; line-height:1.8;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>الخصم (${inv.discountPct}%):</span>
+            <strong>${inv.discountAmount.toFixed(2)} ج.م</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:1.25em; font-weight:bold; border-top:1px solid #999; padding-top:4px;">
+            <span>الإجمالي العام:</span>
+            <span>${inv.grandTotal.toFixed(2)} ج.م</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top:16px; border-top:2px dashed #333; padding-top:10px;">
+          <div style="font-size:1.15em; font-weight:bold;">نورتنا شكرا على ثقتك بنا</div>
+          <div style="font-size:0.95em; font-weight:bold; margin-top:4px; letter-spacing:0.6px;">SMART C-pos</div>
+        </div>
+      `;
+
+      setTimeout(() => window.print(), 120);
+    }
+
+    // ================= ITEMS CRUD =================
+    function renderItemsTable() {
+      const tbody = document.getElementById('items-table-body');
+      tbody.innerHTML = db.items.map(item => `
+        <tr>
+          <td><strong>${item.barcode}</strong></td>
+          <td>${item.name}</td>
+          <td>${Number(item.price).toFixed(2)} ج.م</td>
+          <td>
+            <span class="pill ${Number(item.qty) <= 5 ? 'pill-red' : 'pill-blue'}">${Number(item.qty || 0)}</span>
+          </td>
+          <td style="display:flex; gap:6px; justify-content:center;">
+            <button class="btn btn-outline btn-sm admin-action" ${!canModifyData() ? 'disabled' : ''} onclick="editItem(${item.id})">تعديل</button>
+            <button class="btn btn-danger btn-sm admin-action" ${!canModifyData() ? 'disabled' : ''} onclick="deleteItem(${item.id})">حذف</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function saveItem(e) {
+      e.preventDefault();
+      if (!canModifyData()) return showToast('غير مصرح بالتعديل');
+      const editId = document.getElementById('item-edit-id').value;
+      const barcode = document.getElementById('item-barcode').value.trim();
+      const name = document.getElementById('item-name').value.trim();
+      const price = Number(document.getElementById('item-price').value);
+      const qty = Math.max(0, Number(document.getElementById('item-qty').value) || 0);
+
+      if (editId) {
+        const idx = db.items.findIndex(i => i.id === Number(editId));
+        if (idx > -1) db.items[idx] = { id: Number(editId), barcode, name, price, qty };
+        showToast('تم تعديل الصنف والكمية بنجاح');
+      } else {
+        db.items.push({ id: Date.now(), barcode, name, price, qty });
+        showToast('تمت إضافة الصنف والكمية بنجاح');
+      }
+      saveDB();
+      resetItemForm();
+      renderItemsTable();
+      renderPOSItems();
+    }
+
+    function editItem(id) {
+      if (!canModifyData()) return;
+      const item = db.items.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('item-edit-id').value = item.id;
+      document.getElementById('item-barcode').value = item.barcode;
+      document.getElementById('item-name').value = item.name;
+      document.getElementById('item-price').value = item.price;
+      document.getElementById('item-qty').value = item.qty ?? 0;
+      document.getElementById('item-submit-btn').textContent = 'حفظ التعديل';
+    }
+
+    function deleteItem(id) {
+      if (!canModifyData()) return;
+      db.items = db.items.filter(i => i.id !== id);
+      saveDB();
+      renderItemsTable();
+      renderPOSItems();
+      showToast('تم حذف الصنف');
+    }
+
+    function resetItemForm() {
+      document.getElementById('item-form').reset();
+      document.getElementById('item-qty').value = 0;
+      document.getElementById('item-edit-id').value = '';
+      document.getElementById('item-submit-btn').textContent = 'إضافة الصنف';
+    }
+
+    // ================= PURCHASES =================
+    function addPurchaseItem() {
+      if (!canPerformPurchase()) return showToast('غير مصرح بإضافة فواتير مشتريات');
+      const name = document.getElementById('pur-item-name').value.trim();
+      const qty = Math.max(1, Number(document.getElementById('pur-qty').value) || 1);
+      const price = Math.max(0, Number(document.getElementById('pur-price').value) || 0);
+      if (!name) return showToast('اكتب أو اختر اسم الصنف');
+      purchaseCart.push({ name, qty, price });
+      document.getElementById('pur-item-name').value = '';
+      document.getElementById('pur-qty').value = 1;
+      document.getElementById('pur-price').value = 0;
+      renderPurchaseCart();
+    }
+
+    function removePurchaseCartItem(idx) {
+      if (!canPerformPurchase()) return;
+      purchaseCart.splice(idx, 1);
+      renderPurchaseCart();
+    }
+
+    function renderPurchaseCart() {
+      const tbody = document.getElementById('pur-cart-body');
+      if (purchaseCart.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#64748b;">لم يتم إضافة أصناف لفاتورة الشراء بعد</td></tr>';
+      } else {
+        tbody.innerHTML = purchaseCart.map((p, idx) => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.qty}</td>
+            <td>${p.price.toFixed(2)}</td>
+            <td><strong>${(p.qty * p.price).toFixed(2)}</strong></td>
+            <td><button class="btn btn-danger btn-sm" onclick="removePurchaseCartItem(${idx})">حذف</button></td>
+          </tr>
+        `).join('');
+      }
+      renderPurchaseTotals();
+    }
+
+    function renderPurchaseTotals() {
+      const sub = purchaseCart.reduce((a, b) => a + b.qty * b.price, 0);
+      const discPct = Math.min(100, Math.max(0, Number(document.getElementById('pur-discount').value) || 0));
+      const grand = sub - sub * (discPct / 100);
+      document.getElementById('pur-grand-display').value = grand.toFixed(2) + ' ج.م';
+    }
+
+    function savePurchase() {
+      if (!canPerformPurchase()) return showToast('غير مصرح بحفظ فواتير المشتريات');
+      if (purchaseCart.length === 0) return showToast('أضف أصنافاً لفاتورة المشتريات أولاً');
+      const supplier = document.getElementById('pur-supplier').value.trim() || 'مورد عام';
+      const phone = document.getElementById('pur-phone').value.trim() || '-';
+      const discountPct = Math.min(100, Math.max(0, Number(document.getElementById('pur-discount').value) || 0));
+      const sub = purchaseCart.reduce((a, b) => a + b.qty * b.price, 0);
+      const grandTotal = sub - sub * (discountPct / 100);
+
+      purchaseCart.forEach(pItem => {
+        const match = db.items.find(i => i.name.trim() === pItem.name.trim());
+        if (match) {
+          match.qty = Number(match.qty || 0) + Number(pItem.qty);
+        } else {
+          db.items.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            barcode: String(Math.floor(1000 + Math.random() * 9000)),
+            name: pItem.name.trim(),
+            price: pItem.price,
+            qty: Number(pItem.qty)
+          });
+        }
+      });
+
+      db.purchases.unshift({
+        id: Date.now(),
+        number: db.purchases.length + 1,
+        date: new Date().toLocaleString('ar-EG'),
+        items: JSON.parse(JSON.stringify(purchaseCart)),
+        supplier,
+        phone,
+        discountPct,
+        grandTotal,
+        createdBy: currentUser.name
+      });
+
+      saveDB();
+      purchaseCart = [];
+      document.getElementById('pur-supplier').value = '';
+      document.getElementById('pur-phone').value = '';
+      document.getElementById('pur-discount').value = 0;
+      renderPurchaseCart();
+      renderPurchasesHistory();
+      renderItemsTable();
+      renderPOSItems();
+      renderReports();
+      showToast('تم حفظ فاتورة المشتريات وزيادة كميات الأصناف بنجاح');
+    }
+
+    function renderPurchasesHistory() {
+      const tbody = document.getElementById('purchases-history-body');
+      if (db.purchases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#64748b;">لا توجد فواتير مشتريات مسجلة</td></tr>';
+        return;
+      }
+      tbody.innerHTML = db.purchases.map(p => `
+        <tr>
+          <td>#${p.number}</td>
+          <td>${p.date}</td>
+          <td>${p.items.map(i => `${i.name} (${i.qty})`).join('، ')}</td>
+          <td>${p.supplier}</td>
+          <td>${p.phone}</td>
+          <td>${p.discountPct}%</td>
+          <td><strong>${p.grandTotal.toFixed(2)} ج.م</strong></td>
+          <td>${canModifyData() ? `<button class="btn btn-danger btn-sm" onclick="deletePurchase(${p.id})">حذف</button>` : '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function deletePurchase(id) {
+      if (!canModifyData()) return;
+      db.purchases = db.purchases.filter(p => p.id !== id);
+      saveDB();
+      renderPurchasesHistory();
+      renderReports();
+      showToast('تم حذف فاتورة الشراء');
+    }
+
+    // ================= EMPLOYEES & PERMISSIONS =================
+    function toggleEmpCredentials() {
+      const role = document.getElementById('emp-role').value;
+      const userInp = document.getElementById('emp-username');
+      const passInp = document.getElementById('emp-password');
+      if (role === 'barber') {
+        userInp.value = '';
+        passInp.value = '';
+        userInp.disabled = true;
+        passInp.disabled = true;
+        userInp.required = false;
+        passInp.required = false;
+        userInp.placeholder = 'لا يوجد دخول للحلاق';
+        passInp.placeholder = 'لا يوجد دخول للحلاق';
+      } else {
+        userInp.disabled = false;
+        passInp.disabled = false;
+        userInp.required = true;
+        passInp.required = true;
+        userInp.placeholder = 'username';
+        passInp.placeholder = 'كلمة المرور';
+      }
+    }
+
+    function renderEmployeesTable() {
+      const tbody = document.getElementById('emp-table-body');
+      tbody.innerHTML = db.employees.map(emp => `
+        <tr>
+          <td><strong>${emp.name}</strong></td>
+          <td><span class="pill ${rolePillClass(emp.role)}">${roleLabel(emp.role)}</span></td>
+          <td>${emp.role === 'barber' ? '<span style="color:#94a3b8;">بدون حساب</span>' : emp.username}</td>
+          <td>${emp.role === 'barber' ? '<span style="color:#94a3b8;">—</span>' : (canModifyData() ? emp.password : '****')}</td>
+          <td style="display:flex; gap:6px; justify-content:center;">
+            <button class="btn btn-outline btn-sm admin-action" ${!canModifyData() ? 'disabled' : ''} onclick="editEmployee(${emp.id})">تعديل</button>
+            <button class="btn btn-danger btn-sm admin-action" ${!canModifyData() ? 'disabled' : ''} onclick="deleteEmployee(${emp.id})">حذف</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function saveEmployee(e) {
+      e.preventDefault();
+      if (!canModifyData()) return showToast('غير مصرح بالتعديل');
+      const editId = document.getElementById('emp-edit-id').value;
+      const name = document.getElementById('emp-name').value.trim();
+      const role = document.getElementById('emp-role').value;
+      const username = role === 'barber' ? '' : document.getElementById('emp-username').value.trim();
+      const password = role === 'barber' ? '' : document.getElementById('emp-password').value.trim();
+
+      if (role !== 'barber' && (!username || !password)) {
+        return showToast('يجب إدخال اسم المستخدم وكلمة المرور');
+      }
+
+      if (editId) {
+        const idx = db.employees.findIndex(em => em.id === Number(editId));
+        if (idx > -1) db.employees[idx] = { id: Number(editId), name, username, password, role };
+        showToast('تم تحديث بيانات الموظف');
+      } else {
+        if (role !== 'barber' && db.employees.some(em => em.username === username)) {
+          return showToast('اسم المستخدم مسجل بالفعل');
+        }
+        db.employees.push({ id: Date.now(), name, username, password, role });
+        showToast('تمت إضافة الموظف بنجاح');
+      }
+      saveDB();
+      resetEmpForm();
+      renderEmployeesTable();
+      renderPOSItems();
+    }
+
+    function editEmployee(id) {
+      if (!canModifyData()) return;
+      const emp = db.employees.find(e => e.id === id);
+      if (!emp) return;
+      document.getElementById('emp-edit-id').value = emp.id;
+      document.getElementById('emp-name').value = emp.name;
+      document.getElementById('emp-role').value = emp.role;
+      toggleEmpCredentials();
+      if (emp.role !== 'barber') {
+        document.getElementById('emp-username').value = emp.username;
+        document.getElementById('emp-password').value = emp.password;
+      }
+      document.getElementById('emp-submit-btn').textContent = 'حفظ التعديل';
+    }
+
+    function deleteEmployee(id) {
+      if (!canModifyData()) return;
+      if (currentUser && currentUser.id === id) return showToast('لا يمكن حذف المستخدم الحالي');
+      db.employees = db.employees.filter(e => e.id !== id);
+      saveDB();
+      renderEmployeesTable();
+      renderPOSItems();
+      showToast('تم حذف الموظف');
+    }
+
+    function resetEmpForm() {
+      document.getElementById('emp-form').reset();
+      document.getElementById('emp-edit-id').value = '';
+      document.getElementById('emp-role').value = 'admin';
+      toggleEmpCredentials();
+      document.getElementById('emp-submit-btn').textContent = 'إضافة موظف';
+    }
+
+    // ================= REPORTS VIEW & PRINT =================
+    function selectReportTab(tab) {
+      activeReportTab = tab;
+      document.querySelectorAll('.report-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-rep') === tab);
+      });
+      renderActiveReportViewer();
+    }
+
+    function renderReports() {
+      const totalSales = db.sales.reduce((s, x) => s + x.grandTotal, 0);
+      const totalPurchases = db.purchases.reduce((s, x) => s + x.grandTotal, 0);
+      const net = totalSales - totalPurchases;
+
+      document.getElementById('rep-total-sales').textContent = totalSales.toFixed(2) + ' ج.م';
+      document.getElementById('rep-total-purchases').textContent = totalPurchases.toFixed(2) + ' ج.م';
+      document.getElementById('rep-net-total').textContent = net.toFixed(2) + ' ج.م';
+      document.getElementById('rep-ops-count').textContent = db.sales.length + db.purchases.length;
+
+      renderActiveReportViewer();
+    }
+
+    function buildReportHtml(kind) {
+      const totalSales = db.sales.reduce((s, x) => s + x.grandTotal, 0);
+      const totalPurchases = db.purchases.reduce((s, x) => s + x.grandTotal, 0);
+
+      if (kind === 'sales') {
+        return {
+          title: 'تقرير المبيعات التفصيلي',
+          html: `
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>رقم الفاتورة</th><th>التاريخ</th><th>العميل</th><th>الهاتف</th><th>الكرسي</th><th>الحلاق</th><th>الحالة</th><th>الخصم</th><th>الإجمالي العام</th></tr></thead>
+                <tbody>
+                  ${db.sales.length === 0 ? '<tr><td colspan="9">لا توجد مبيعات مسجلة</td></tr>' : db.sales.map(s => `
+                    <tr>
+                      <td>#${s.number}</td><td>${s.date}</td><td>${s.customer}</td><td>${s.phone}</td>
+                      <td>${s.chair}</td><td>${s.barber}</td><td>${s.status}</td><td>${s.discountPct}%</td>
+                      <td><strong>${s.grandTotal.toFixed(2)} ج.م</strong></td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px; font-weight:800; color:var(--blue-900); font-size:16px;">إجمالي المبيعات: ${totalSales.toFixed(2)} ج.م</div>
+          `
+        };
+      }
+
+      if (kind === 'purchases') {
+        return {
+          title: 'تقرير المشتريات التفصيلي',
+          html: `
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>رقم الفاتورة</th><th>التاريخ</th><th>المورد</th><th>الهاتف</th><th>الأصناف</th><th>الخصم</th><th>الإجمالي العام</th></tr></thead>
+                <tbody>
+                  ${db.purchases.length === 0 ? '<tr><td colspan="7">لا توجد مشتريات مسجلة</td></tr>' : db.purchases.map(p => `
+                    <tr>
+                      <td>#${p.number}</td><td>${p.date}</td><td>${p.supplier}</td><td>${p.phone}</td>
+                      <td>${p.items.map(i => `${i.name} (${i.qty})`).join('، ')}</td><td>${p.discountPct}%</td>
+                      <td><strong>${p.grandTotal.toFixed(2)} ج.م</strong></td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px; font-weight:800; color:var(--danger); font-size:16px;">إجمالي المشتريات: ${totalPurchases.toFixed(2)} ج.م</div>
+          `
+        };
+      }
+
+      if (kind === 'employees') {
+        return {
+          title: 'تقرير الموظفين والحلاقين والأداء',
+          html: `
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>اسم الموظف / الحلاق</th><th>الوظيفة / الصلاحية</th><th>عدد عمليات البيع</th><th>إجمالي المبيعات المحققة</th></tr></thead>
+                <tbody>
+                  ${db.employees.map(emp => {
+                    const list = db.sales.filter(s => s.barber === emp.name);
+                    const sum = list.reduce((a, b) => a + b.grandTotal, 0);
+                    return `
+                      <tr>
+                        <td><strong>${emp.name}</strong></td>
+                        <td><span class="pill ${rolePillClass(emp.role)}">${roleLabel(emp.role)}</span></td>
+                        <td>${list.length}</td>
+                        <td><strong>${sum.toFixed(2)} ج.م</strong></td>
+                      </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `
+        };
+      }
+
+      const ops = [
+        ...db.sales.map(s => ({
+          type: 'مبيعات', date: s.date, party: s.customer,
+          details: s.items.map(i => `${i.name} × ${i.qty}`).join('، '),
+          total: s.grandTotal
+        })),
+        ...db.purchases.map(p => ({
+          type: 'مشتريات', date: p.date, party: p.supplier,
+          details: p.items.map(i => `${i.name} × ${i.qty}`).join('، '),
+          total: p.grandTotal
+        }))
+      ];
+
+      return {
+        title: 'التقرير الإجمالي العام لجميع العمليات',
+        html: `
+          <div class="table-wrap" style="margin-bottom:16px;">
+            <table>
+              <thead><tr><th>البيان</th><th>عدد العمليات</th><th>الإجمالي</th></tr></thead>
+              <tbody>
+                <tr><td>إجمالي المبيعات</td><td>${db.sales.length}</td><td><strong>${totalSales.toFixed(2)} ج.م</strong></td></tr>
+                <tr><td>إجمالي المشتريات</td><td>${db.purchases.length}</td><td><strong>${totalPurchases.toFixed(2)} ج.م</strong></td></tr>
+                <tr style="background:#eff6ff;"><td><strong>الصافي العام لجميع العمليات</strong></td><td><strong>${db.sales.length + db.purchases.length}</strong></td><td><strong>${(totalSales - totalPurchases).toFixed(2)} ج.م</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4 style="color:var(--blue-900); margin-bottom:10px;">سجل العمليات التفصيلي</h4>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>نوع العملية</th><th>التاريخ</th><th>العميل / المورد</th><th>التفاصيل</th><th>الإجمالي العام</th></tr></thead>
+              <tbody>
+                ${ops.length === 0 ? '<tr><td colspan="5">لا توجد عمليات مسجلة</td></tr>' : ops.map(o => `
+                  <tr>
+                    <td><span class="pill ${o.type === 'مبيعات' ? 'pill-green' : 'pill-warn'}">${o.type}</span></td>
+                    <td>${o.date}</td><td>${o.party}</td><td>${o.details}</td>
+                    <td><strong>${o.total.toFixed(2)} ج.م</strong></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `
+      };
+    }
+
+    function renderActiveReportViewer() {
+      const box = document.getElementById('report-viewer-box');
+      const rep = buildReportHtml(activeReportTab);
+      box.innerHTML = `<h4 style="color:var(--blue-900); margin-bottom:12px;">${rep.title}</h4>` + rep.html;
+    }
+
+    function printActiveReport() {
+      printReport(activeReportTab);
+    }
+
+    function printReport(kind) {
+      const st = db.settings;
+      const modeClass = st.reportPrintType === 'thermal' ? 'print-thermal' : 'print-a4';
+      const logoHtml = getLogoImgHtml('width:76px; height:76px; object-fit:contain; display:block; margin:0 auto 6px; border-radius:50%;');
+      const rep = buildReportHtml(kind);
+
+      const area = document.getElementById('print-area');
+      area.className = modeClass;
+      area.innerHTML = `
+        <div style="text-align:center; border-bottom:2px solid #333; padding-bottom:8px; margin-bottom:12px;">
+          ${logoHtml}
+          <h2 style="margin:2px 0;">${FIXED_SHOP_NAME}</h2>
+          <div>موبايل: ${FIXED_SHOP_PHONE}</div>
+          <h3 style="margin:8px 0 2px;">${rep.title}</h3>
+          <div style="font-size:0.9em;">تاريخ الطباعة: ${new Date().toLocaleString('ar-EG')}</div>
+        </div>
+        ${rep.html}
+        <div style="text-align:center; margin-top:16px; border-top:1px dashed #333; padding-top:8px; font-weight:bold;">
+          SMART C-pos
+        </div>
+      `;
+      setTimeout(() => window.print(), 120);
+    }
+
+    // ================= CONTROL PANEL / SETTINGS =================
+    function applySettingsUI() {
+      const st = db.settings;
+      document.getElementById('header-shop-name').textContent = FIXED_SHOP_NAME;
+      document.getElementById('hub-shop-name').textContent = FIXED_SHOP_NAME;
+      document.getElementById('header-shop-phone').textContent = FIXED_SHOP_PHONE;
+      document.getElementById('header-logo-box').innerHTML = getLogoImgHtml('width:100%; height:100%; object-fit:contain;');
+
+      document.getElementById('set-invoice-print').value = st.invoicePrintType || 'thermal';
+      document.getElementById('set-report-print').value = st.reportPrintType || 'a4';
+    }
+
+    function saveSettings(e) {
+      e.preventDefault();
+      if (!canModifyData()) return showToast('التعديل متاح للمدير فقط');
+      db.settings.invoicePrintType = document.getElementById('set-invoice-print').value;
+      db.settings.reportPrintType = document.getElementById('set-report-print').value;
+      saveDB();
+      applySettingsUI();
+      showToast('تم حفظ إعدادات لوحة التحكم بنجاح');
+    }
+
+    // ================= LIVE CLOCK =================
+    function updateClock() {
+      const el = document.getElementById('live-clock');
+      if (el) el.textContent = new Date().toLocaleString('ar-EG');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
